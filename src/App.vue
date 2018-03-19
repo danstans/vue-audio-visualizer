@@ -18,16 +18,22 @@ export default {
     return {
       playlist: [
         {
+          songName: 'Agnes',
+          songSrc: 'https://github.com/danstans/vue-audio-visualizer/raw/master/src/assets/agnes.mp3',
+          artistName: 'Glass Animals',
+          songImg: 'https://pbs.twimg.com/profile_images/765322021060354048/0ppD4P6Y_400x400.jpg'
+        },
+        {
           songName: 'TaKillya (Baby Driver Soundtrack)',
-          songSrc: 'http://k003.kiwi6.com/hotlink/x84m8bfceb/Legend_of_Zelda_Remix_Kiwi6_Exclusive_DL_.mp3',
+          songSrc: 'https://github.com/danstans/vue-audio-visualizer/raw/master/src/assets/takillya.mp3',
           artistName: 'Vinnie Maniscalco',
           songImg: 'https://adamology.net/wp-content/uploads/2017/07/Baby-Driver.jpg'
         },
         {
-          songName: 'Fragile',
-          songSrc: 'http://k006.kiwi6.com/hotlink/89egzfld8n/Fragile.mp3',
-          artistName: 'Marek Iwaszkiewicz',
-          songImg: 'https://pbs.twimg.com/profile_images/765322021060354048/0ppD4P6Y_400x400.jpg'
+          songName: 'Kipod',
+          songSrc: 'https://github.com/danstans/vue-audio-visualizer/raw/master/src/assets/kipod.mp3',
+          artistName: 'Infected Mushrrom',
+          songImg: 'https://is4-ssl.mzstatic.com/image/thumb/Music/45/71/ff/mzi.mtqdovgf.jpg/1200x630bb.jpg'
         }
       ]
     }
