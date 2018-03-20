@@ -1,23 +1,23 @@
 <template>
   <div class="av" :style="{ '--av-height': avHeight }" v-if="playlist">
-    <av-canvas v-if="showVis"/>
+    <av-canvas :audioAnalyser="myAnalyser" v-if="showVis"/>
     <div class="av__audio">
       <!-- <img src="../../assets/logo.png"> -->
       <div class="av__audio__meta">
         <div class="av__audio__meta__img">
-          <img :src="playlist[currentSong].songImg" alt="">
+          <img :src="computedPlaylist[currentSong].songImg" alt="">
         </div>
         <div class="av__audio__meta__tags">
-          <span class="av__audio__meta__tags__title">{{playlist[currentSong].songName}}</span>
-          <span class="av__audio__meta__tags__artist">{{playlist[currentSong].artistName}}</span>
+          <span class="av__audio__meta__tags__title">{{computedPlaylist[currentSong].songName}}</span>
+          <span class="av__audio__meta__tags__artist">{{computedPlaylist[currentSong].artistName}}</span>
         </div>
       </div>
       <div class="av__audio__playback">
         <span @click="evalSong">Play button /</span>
         <span @click="nextSong">/ Go Next /</span>
         <span @click="prevSong">/ Go prev /</span>
-        <span @click="toggleShuffle">/ Shuffle /</span>
-        <span @click="toggleRepeat">/ Repeat /</span>
+        <span @click="toggleShuffle">/ Shuffle {{ isShuffling ? 'on' : 'off'}} /</span>
+        <span @click="toggleRepeat">/ Repeat {{repeatVal}} /</span>
         <span>/ Progress bar</span>
       </div>
       <div class="av__audio__togglers">
@@ -25,7 +25,7 @@
         <span>Toggle Volume</span>
         <span>Toggle Playlist</span>
       </div>
-      <audio :src="playlist[currentSong].songSrc" type="audio/ogg" ref="myAudio"></audio>
+      <audio :src="computedPlaylist[currentSong].songSrc" type="audio/ogg" ref="myAudio" @ended="handleSongEnd"></audio>
     </div>
   </div>
 </template>
@@ -37,6 +37,7 @@ export default {
   name: 'AudioVisualizer',
   mounted: function () {
     this.myAudioPlayer = this.$refs.myAudio
+    this.setAnalyser()
   },
   props: {
     avHeight: {
@@ -53,9 +54,18 @@ export default {
     return {
       showVis: false,
       myAudioPlayer: null,
+      myAnalyser: null,
       currentSong: 0,
       isShuffling: false,
-      isRepeat: 0
+      repeatVal: 0 // 0 -> repeat none, 1 -> repeat one, 2 -> repeat all
+    }
+  },
+  computed: {
+    computedPlaylist () {
+      if (this.isShuffling) {
+        return Utils.shuffle(this.playlist)
+      }
+      return this.playlist
     }
   },
   methods: {
@@ -68,10 +78,12 @@ export default {
       }.bind(this), 150)
     },
     pauseSong () {
-      this.myAudioPlayer.pause()
+      setTimeout(function () {
+        this.myAudioPlayer.pause()
+      }.bind(this), 150)
     },
     nextSong () {
-      this.myAudioPlayer.pause()
+      // this.myAudioPlayer.pause()
       this.currentSong = (this.currentSong + 1) % this.playlist.length
       this.myAudioPlayer.currentTime = 0
       this.playSong()
@@ -85,10 +97,34 @@ export default {
     },
     toggleShuffle () {
       this.isShuffling = !this.isShuffling
+      // console.log(this.computedPlaylist)s
     },
     toggleRepeat () {
-      this.isRepeat = Utils.mod(this.isRepeat + 1, 3)
-      console.log(this.isRepeat)
+      this.repeatVal = Utils.mod(this.repeatVal + 1, 3)
+    },
+    handleSongEnd () {
+      switch (this.repeatVal) {
+        case 0: // Repeat None
+          (this.currentSong + 1 === this.playlist.length) ? this.currentSong = 0 : this.nextSong()
+          break
+        case 1: // Repeat One
+          this.myAudioPlayer.currentTime = 0
+          this.playSong()
+          break
+        case 2: // Repeat All
+          this.nextSong()
+          break
+      }
+    },
+    setAnalyser: function () {
+      const ctx = new AudioContext()
+      const src = ctx.createMediaElementSource(this.myAudioPlayer)
+      ctx.crossOrigin = 'anonymous'
+      this.myAudioPlayer.crossOrigin = 'anonymous'
+      this.myAnalyser = ctx.createAnalyser()
+      src.connect(this.myAnalyser)
+      this.myAnalyser.fftSize = 1024
+      this.myAnalyser.connect(ctx.destination)
     }
   }
 }
@@ -101,6 +137,7 @@ export default {
   position: fixed;
   bottom: 0;
   color: white;
+  user-select: none;
 
   &__audio {
     width: 100%;
@@ -119,6 +156,7 @@ export default {
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      // user-select: auto;
 
       &__img {
         width: var(--av-height);
@@ -161,6 +199,10 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
+
+      >span {
+        cursor: pointer;
+      }
     }
 
     &__togglers {
