@@ -31,12 +31,21 @@
         ></audio-controls>
       </div>
       <div class="av__audio__togglers">
-        <span @click="showCanvas">Toggle Visualizer</span>
-        <span>Toggle Volume</span>
-        <span>Toggle Playlist</span>
+        <div class="av__audio__togglers__volume">
+          <div class="av__audio__togglers__volume__hover" @mouseover="togglers.showVolumeSlider=true" @mouseout="togglers.showVolumeSlider=false" v-show="togglers.showVolumeSlider">
+            <i class="fa fa-volume-off"></i>
+            <div>
+              <input class="volume-slider" ref="volumeBar" type="range" min="0" max="100" @input="slideVolume"/>
+              <span ref="volumeLeft"></span>
+            </div>
+          </div>
+          <i class="fa fa-volume-up" @mouseover="togglers.showVolumeSlider=true" @mouseout="togglers.showVolumeSlider=false" aria-hidden="true"></i>
+        </div>
+        <i class="fa fa-list-ol" aria-hidden="true"></i>
+        <i @click="showCanvas" class="fa fa-signal" aria-hidden="true"></i>
       </div>
       <audio
-      :src="computedPlaylist[currentSong].songLive"
+      :src="computedPlaylist[currentSong].songSrc"
       type="audio/mp3"
       ref="myAudio"
       @timeupdate='onTimeUpdateListener'
@@ -53,7 +62,10 @@ export default {
   name: 'AudioVisualizer',
   mounted: function () {
     this.myAudioPlayer = this.$refs.myAudio
+    this.volume.volumeBar = this.$refs.volumeBar
+    this.volume.volumeLeft = this.$refs.volumeLeft
     this.setAnalyser()
+    this.updateVolumeBar()
   },
   props: {
     avHeight: {
@@ -70,6 +82,7 @@ export default {
     return {
       showVis: false,
       myAudioPlayer: null,
+      volumeBar: null,
       myAnalyser: null,
       currentSong: 0,
       isShuffling: false,
@@ -79,6 +92,13 @@ export default {
         songTime: '',
         songDuration: '',
         songPaused: true
+      },
+      volume: {
+        volumeBar: null,
+        volumeLeft: null
+      },
+      togglers: {
+        showVolumeSlider: false
       }
     }
   },
@@ -124,9 +144,43 @@ export default {
     },
     lowerVolume () {
       this.myAudioPlayer.volume - 0.05 < 0 ? this.myAudioPlayer.volume = 0 : this.myAudioPlayer.volume -= 0.05
+      this.updateVolumeBar()
     },
     raiseVolume () {
       this.myAudioPlayer.volume + 0.05 > 1 ? this.myAudioPlayer.volume = 1 : this.myAudioPlayer.volume += 0.05
+      this.updateVolumeBar()
+    },
+    updateVolumeBar () {
+      // this.volumeBar.style.width = (this.myAudioPlayer.volume * 100).toString() + '%'
+      // this.volume.volumeLeft.style.width = (this.myAudioPlayer.volume * 100 - 4).toString() + '%'
+      this.cleanVolumeLeft(this.myAudioPlayer.volume * 100)
+      this.volume.volumeBar.value = (this.myAudioPlayer.volume * 100)
+    },
+    slideVolume (event) {
+      var targetVal = event.target.value
+      this.cleanVolumeLeft(targetVal)
+      this.setVolume(targetVal / 100)
+    },
+    setVolume (val) {
+      this.myAudioPlayer.volume = val
+      this.volume.volumeLeft.style.display = 'block'
+      if (val === 0) {
+        this.volume.volumeLeft.style.display = 'none'
+        this.volume.volumeLeft.style.width = '0%'
+      }
+    },
+    cleanVolumeLeft (targetVal) {
+      if (targetVal > 75) {
+        this.volume.volumeLeft.style.width = (targetVal - 6).toString() + '%'
+      } else if (targetVal > 50) {
+        this.volume.volumeLeft.style.width = (targetVal - 3.5).toString() + '%'
+      } else if (targetVal > 25) {
+        this.volume.volumeLeft.style.width = (targetVal - 3).toString() + '%'
+      } else if (targetVal > 10) {
+        this.volume.volumeLeft.style.width = (targetVal - 2).toString() + '%'
+      } else {
+        this.volume.volumeLeft.style.width = (targetVal - 1.5).toString() + '%'
+      }
     },
     toggleShuffle () {
       this.isShuffling = !this.isShuffling
@@ -220,12 +274,12 @@ export default {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        font-family: Helvetica, sans-serif;
 
         &__title {
           font-size: 14px;
           line-height: 20px;
           letter-spacing: 0.21px;
-          font-family: Helvetica, sans-serif;
           color: #fff;
         }
 
@@ -250,11 +304,98 @@ export default {
       right: 10px;
       top: 0px;
       height: 100%;
-      color: #fff;
+      color: hsla(0, 0%, 100%, .6);
       display: flex;
-      flex-direction: column;
+      flex-direction: space-between;
       justify-content: center;
+      align-items: center;
+      margin: 0 -5px;
+
+      &__volume {
+        width: 150px;
+        height: 30px;
+        margin: 0 5px;
+        display: flex;
+        justify-content: flex-end;
+
+        &__hover {
+          flex-grow: 1;
+          height: 100%;
+          display: flex;
+          margin: 0 -5px;
+
+          >i {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          >div {
+            margin: 0 5px;
+            width: 80%;
+            align-self: center;
+            position: relative;
+
+            .volume-slider {
+              -webkit-appearance: none;
+              position: absolute;
+              border-radius: 5px;
+            }
+
+            >span {
+              position: absolute;
+              background: white;
+              border: 1px solid white;
+              height: 100%;
+              border-radius: 5px;
+              z-index: 1;
+              width: calc(50% - 3px);
+            }
+          }
+
+        }
+
+        >i {
+          margin: 0 -5px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+
+      >i {
+        width: 30px;
+        margin: 0 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
     }
   }
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  background-color: gray;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  height: 3px;
+  -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: green;
 }
 </style>
