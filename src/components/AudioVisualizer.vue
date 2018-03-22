@@ -1,5 +1,6 @@
 <template>
   <div class="av" :style="{ '--av-height': avHeight }" ref="av" v-if="playlist">
+    <!-- The canvas component with visualizations -->
     <av-canvas
     :audioAnalyser="myAnalyser"
     @pauseSong="evalSong"
@@ -8,7 +9,11 @@
     @lowerVolume="lowerVolume"
     @raiseVolume="raiseVolume"
     v-if="showVis"/>
+    
+    <!-- Wrapper for the audio player bottom of the page -->
     <div class="av__audio">
+      
+      <!-- Audio meta data about the current song -->
       <div class="av__audio__meta">
         <div class="av__audio__meta__img">
           <img :src="computedPlaylist[currentSong].songImg" alt="">
@@ -18,18 +23,20 @@
           <span class="av__audio__meta__tags__artist">{{computedPlaylist[currentSong].artistName}}</span>
         </div>
       </div>
-      <div class="av__audio__playback">
-        <audio-controls
-        @evalSong="evalSong"
-        @nextSong="nextSong"
-        @prevSong="prevSong"
-        @toggleShuffle="toggleShuffle"
-        @toggleRepeat="toggleRepeat"
-        :repeatVal="repeatVal"
-        :isShuffling="isShuffling"
-        :songControls="songControls"
-        ></audio-controls>
-      </div>
+
+      <!-- Audio Controls (Play/Prev/Next + Song Progress) -->
+      <audio-controls
+      @evalSong="evalSong"
+      @nextSong="nextSong"
+      @prevSong="prevSong"
+      @toggleShuffle="toggleShuffle"
+      @toggleRepeat="toggleRepeat"
+      :repeatVal="repeatVal"
+      :isShuffling="isShuffling"
+      :songControls="songControls"
+      ></audio-controls>
+
+      <!-- Page Togglers on the right side -->
       <div class="av__audio__togglers">
         <div class="av__audio__togglers__volume">
           <div class="av__audio__togglers__volume__hover" @mouseover="togglers.showVolumeSlider=true" @mouseout="togglers.showVolumeSlider=false" v-show="togglers.showVolumeSlider">
@@ -44,6 +51,8 @@
         <i class="fa fa-list-ol" aria-hidden="true"></i>
         <i @click="showCanvas" class="fa fa-signal" aria-hidden="true"></i>
       </div>
+
+      <!-- HTML5 Audio -->
       <audio
       :src="computedPlaylist[currentSong].songSrc"
       type="audio/mp3"

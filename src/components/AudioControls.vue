@@ -1,19 +1,21 @@
 <template>
-  <div class="audio__controls">
-    <div class="audio__controls__controls">
-      <i @click="$emit('toggleShuffle')" class="fa fa-random"></i>
-      <i @click="$emit('prevSong')" class="fa fa-step-backward"></i>
-      <i v-if="songControls.songPaused" @click="$emit('evalSong')" class="fa fa-play-circle fa-2x"></i>
-      <i v-else @click="$emit('evalSong')" class="fa fa-pause-circle fa-2x"></i>
-      <i @click="$emit('nextSong')" class="fa fa-step-forward"></i>
-      <i @click="$emit('toggleRepeat')" class="fa fa-repeat"></i>
-    </div>
-    <div class="audio__controls__progress ">
-      <div class="audio__controls__progress__currentTime">{{songControls.songTime}}</div>
-      <div class="audio__controls__progress__bar">
-        <div class="audio__controls__progress__bar__percent" ref="progressBar"></div>
+  <div class="av__audio__playback">
+    <div class="audio__controls">
+      <div class="audio__controls__controls">
+        <i @click="$emit('toggleShuffle')" class="fa fa-random"></i>
+        <i @click="$emit('prevSong')" class="fa fa-step-backward"></i>
+        <i v-if="songControls.songPaused" @click="$emit('evalSong')" class="fa fa-play-circle fa-2x"></i>
+        <i v-else @click="$emit('evalSong')" class="fa fa-pause-circle fa-2x"></i>
+        <i @click="$emit('nextSong')" class="fa fa-step-forward"></i>
+        <i @click="$emit('toggleRepeat')" class="fa fa-repeat"></i>
       </div>
-      <div class="audio__controls__progress__songDuration">{{songControls.songDuration}}</div>
+      <div class="audio__controls__progress ">
+        <div class="audio__controls__progress__currentTime">{{songControls.songTime}}</div>
+        <div class="audio__controls__progress__bar">
+          <div class="audio__controls__progress__bar__percent" ref="progressBar"></div>
+        </div>
+        <div class="audio__controls__progress__songDuration">{{songControls.songDuration}}</div>
+      </div>
     </div>
   </div>
 </template>
