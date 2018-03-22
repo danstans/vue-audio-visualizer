@@ -1,8 +1,14 @@
 <template>
-  <div class="av" :style="{ '--av-height': avHeight }" v-if="playlist">
-    <av-canvas :audioAnalyser="myAnalyser" v-if="showVis"/>
+  <div class="av" :style="{ '--av-height': avHeight }" ref="av" v-if="playlist">
+    <av-canvas
+    :audioAnalyser="myAnalyser"
+    @pauseSong="evalSong"
+    @prevSong="prevSong"
+    @nextSong="nextSong"
+    @lowerVolume="lowerVolume"
+    @raiseVolume="raiseVolume"
+    v-if="showVis"/>
     <div class="av__audio">
-      <!-- <img src="../../assets/logo.png"> -->
       <div class="av__audio__meta">
         <div class="av__audio__meta__img">
           <img :src="computedPlaylist[currentSong].songImg" alt="">
@@ -13,25 +19,35 @@
         </div>
       </div>
       <div class="av__audio__playback">
-        <span @click="evalSong">Play button /</span>
-        <span @click="nextSong">/ Go Next /</span>
-        <span @click="prevSong">/ Go prev /</span>
-        <span @click="toggleShuffle">/ Shuffle {{ isShuffling ? 'on' : 'off'}} /</span>
-        <span @click="toggleRepeat">/ Repeat {{repeatVal}} /</span>
-        <span>/ Progress bar</span>
+        <audio-controls
+        @evalSong="evalSong"
+        @nextSong="nextSong"
+        @prevSong="prevSong"
+        @toggleShuffle="toggleShuffle"
+        @toggleRepeat="toggleRepeat"
+        :repeatVal="repeatVal"
+        :isShuffling="isShuffling"
+        :songControls="songControls"
+        ></audio-controls>
       </div>
       <div class="av__audio__togglers">
-        <span @click="showVis = !showVis">Toggle Visualizer</span>
+        <span @click="showCanvas">Toggle Visualizer</span>
         <span>Toggle Volume</span>
         <span>Toggle Playlist</span>
       </div>
-      <audio :src="computedPlaylist[currentSong].songSrc" type="audio/ogg" ref="myAudio" @ended="handleSongEnd"></audio>
+      <audio
+      :src="computedPlaylist[currentSong].songLive"
+      type="audio/mp3"
+      ref="myAudio"
+      @timeupdate='onTimeUpdateListener'
+      @ended="handleSongEnd"></audio>
     </div>
   </div>
 </template>
 
 <script>
-import AvCanvas from './AvCanvas'
+import AvCanvas from './AvCanvas/AvCanvas'
+import AudioControls from './AudioControls'
 import * as Utils from '../utils/utils.js'
 export default {
   name: 'AudioVisualizer',
@@ -49,7 +65,7 @@ export default {
       default: null
     }
   },
-  components: { AvCanvas },
+  components: { AvCanvas, AudioControls },
   data () {
     return {
       showVis: false,
@@ -57,7 +73,13 @@ export default {
       myAnalyser: null,
       currentSong: 0,
       isShuffling: false,
-      repeatVal: 0 // 0 -> repeat none, 1 -> repeat one, 2 -> repeat all
+      repeatVal: 0, // 0 -> repeat none, 1 -> repeat one, 2 -> repeat all
+      songControls: {
+        songPercent: 0,
+        songTime: '',
+        songDuration: '',
+        songPaused: true
+      }
     }
   },
   computed: {
@@ -69,21 +91,26 @@ export default {
     }
   },
   methods: {
+    showCanvas () {
+      this.showVis = !this.showVis
+      this.showVis ? this.$refs.av.style.height = '100%' : this.$refs.av.style.height = 'auto'
+    },
     evalSong () {
       this.myAudioPlayer.paused ? this.playSong() : this.pauseSong()
     },
     playSong () {
       setTimeout(function () {
         this.myAudioPlayer.play()
+        this.songControls.songPaused = false
       }.bind(this), 150)
     },
     pauseSong () {
       setTimeout(function () {
         this.myAudioPlayer.pause()
+        this.songControls.songPaused = true
       }.bind(this), 150)
     },
     nextSong () {
-      // this.myAudioPlayer.pause()
       this.currentSong = (this.currentSong + 1) % this.playlist.length
       this.myAudioPlayer.currentTime = 0
       this.playSong()
@@ -95,12 +122,29 @@ export default {
       this.myAudioPlayer.currentTime = 0
       this.playSong()
     },
+    lowerVolume () {
+      this.myAudioPlayer.volume - 0.05 < 0 ? this.myAudioPlayer.volume = 0 : this.myAudioPlayer.volume -= 0.05
+    },
+    raiseVolume () {
+      this.myAudioPlayer.volume + 0.05 > 1 ? this.myAudioPlayer.volume = 1 : this.myAudioPlayer.volume += 0.05
+    },
     toggleShuffle () {
       this.isShuffling = !this.isShuffling
-      // console.log(this.computedPlaylist)s
     },
     toggleRepeat () {
       this.repeatVal = Utils.mod(this.repeatVal + 1, 3)
+    },
+    onTimeUpdateListener () {
+      var currentTime = this.myAudioPlayer.currentTime
+      var currentDuration = this.myAudioPlayer.duration
+      var percent = (currentTime / currentDuration)
+      if (isNaN(percent)) {
+        this.songControls.songPercent = 0
+      } else {
+        this.songControls.songPercent = percent
+        this.songControls.songTime = Math.floor(currentTime.toFixed(0) / 60) + ':' + (currentTime.toFixed(0) % 60 ? Utils.minTwoDigits((currentTime.toFixed(0) % 60)) : '00')
+        this.songControls.songDuration = Math.floor(currentDuration.toFixed(0) / 60) + ':' + (currentDuration.toFixed(0) % 60 ? Utils.minTwoDigits(currentDuration.toFixed(0) % 60) : '00')
+      }
     },
     handleSongEnd () {
       switch (this.repeatVal) {
@@ -123,7 +167,7 @@ export default {
       this.myAudioPlayer.crossOrigin = 'anonymous'
       this.myAnalyser = ctx.createAnalyser()
       src.connect(this.myAnalyser)
-      this.myAnalyser.fftSize = 1024
+      this.myAnalyser.fftSize = 32768
       this.myAnalyser.connect(ctx.destination)
     }
   }
@@ -131,8 +175,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('../../node_modules/font-awesome/css/font-awesome.min.css');
 .av {
-  height: 100vh;
   width: 100%;
   position: fixed;
   bottom: 0;
@@ -156,7 +200,6 @@ export default {
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      // user-select: auto;
 
       &__img {
         width: var(--av-height);
@@ -195,14 +238,11 @@ export default {
     &__playback {
       margin: 0 auto;
       height: 100%;
-      width: 50%;
+      width: 40%;
+      max-width: 770px;
       display: flex;
       justify-content: center;
       align-items: center;
-
-      >span {
-        cursor: pointer;
-      }
     }
 
     &__togglers {

@@ -21,3 +21,7 @@ export function shuffle (array) {
   }
   return array
 }
+
+export function minTwoDigits (num) {
+  return (num < 10 ? '0' : '') + num
+}
