@@ -1,5 +1,6 @@
 <template>
-  <div class="av" :style="{ '--av-height': avHeight }" ref="av" v-if="playlist">
+<div :style="{ '--av-height': avHeight }">
+  <div class="av" ref="av" v-if="playlist">
     <!-- The canvas component with visualizations -->
     <av-canvas
     :audioAnalyser="myAnalyser"
@@ -8,11 +9,11 @@
     @nextSong="nextSong"
     @lowerVolume="lowerVolume"
     @raiseVolume="raiseVolume"
-    v-if="showVis"/>
-    
+    v-if="isShowing.showVis"/>
+
     <!-- Wrapper for the audio player bottom of the page -->
     <div class="av__audio">
-      
+
       <!-- Audio meta data about the current song -->
       <div class="av__audio__meta">
         <div class="av__audio__meta__img">
@@ -48,25 +49,33 @@
           </div>
           <i class="fa fa-volume-up" @mouseover="togglers.showVolumeSlider=true" @mouseout="togglers.showVolumeSlider=false" aria-hidden="true"></i>
         </div>
-        <i class="fa fa-list-ol" aria-hidden="true"></i>
-        <i @click="showCanvas" class="fa fa-signal" aria-hidden="true"></i>
+        <i class="fa fa-list-ol" :class="{'active-fa': isShowing.playlist}" aria-hidden="true" @click="isShowing.playlist = !isShowing.playlist"></i>
+        <i @click="showCanvas" :class="{'active-fa': isShowing.showVis}" class="fa fa-signal" aria-hidden="true"></i>
       </div>
 
       <!-- HTML5 Audio -->
       <audio
-      :src="computedPlaylist[currentSong].songSrc"
+      :src="computedPlaylist[currentSong].songLive"
       type="audio/mp3"
       ref="myAudio"
       @timeupdate='onTimeUpdateListener'
       @ended="handleSongEnd"></audio>
     </div>
   </div>
+  <audio-playlist
+  :playlist="playlist"
+  @chooseSong="chooseSong"
+  v-if="isShowing.playlist"
+  ></audio-playlist>
+</div>
 </template>
 
 <script>
 import AvCanvas from './AvCanvas/AvCanvas'
 import AudioControls from './AudioControls'
+import AudioPlaylist from './AudioPlaylist'
 import * as Utils from '../utils/utils.js'
+import Vue from 'vue'
 export default {
   name: 'AudioVisualizer',
   mounted: function () {
@@ -86,16 +95,19 @@ export default {
       default: null
     }
   },
-  components: { AvCanvas, AudioControls },
+  components: { AvCanvas, AudioControls, AudioPlaylist },
   data () {
     return {
-      showVis: false,
       myAudioPlayer: null,
       volumeBar: null,
       myAnalyser: null,
       currentSong: 0,
       isShuffling: false,
       repeatVal: 0, // 0 -> repeat none, 1 -> repeat one, 2 -> repeat all
+      isShowing: {
+        playlist: false,
+        showVis: false
+      },
       songControls: {
         songPercent: 0,
         songTime: '',
@@ -121,32 +133,49 @@ export default {
   },
   methods: {
     showCanvas () {
-      this.showVis = !this.showVis
-      this.showVis ? this.$refs.av.style.height = '100%' : this.$refs.av.style.height = 'auto'
+      this.isShowing.showVis = !this.isShowing.showVis
+      this.isShowing.showVis ? this.$refs.av.style.height = '100%' : this.$refs.av.style.height = 'auto'
     },
     evalSong () {
       this.myAudioPlayer.paused ? this.playSong() : this.pauseSong()
+    },
+    chooseSong (songIndex) {
+      if (this.currentSong !== songIndex) {
+        Vue.set(this.playlist[this.currentSong], 'isPlaying', false)
+        this.currentSong = songIndex
+        this.myAudioPlayer.currentTime = 0
+        this.playSong()
+      } else if (this.currentSong === songIndex && this.songControls.songPaused) {
+        this.playSong()
+      } else {
+        this.pauseSong()
+      }
     },
     playSong () {
       setTimeout(function () {
         this.myAudioPlayer.play()
         this.songControls.songPaused = false
+        Vue.set(this.playlist[this.currentSong], 'isPlaying', true)
       }.bind(this), 150)
     },
     pauseSong () {
       setTimeout(function () {
         this.myAudioPlayer.pause()
         this.songControls.songPaused = true
+        Vue.set(this.playlist[this.currentSong], 'isPlaying', false)
       }.bind(this), 150)
     },
     nextSong () {
+      Vue.set(this.playlist[this.currentSong], 'isPlaying', false)
       this.currentSong = (this.currentSong + 1) % this.playlist.length
       this.myAudioPlayer.currentTime = 0
       this.playSong()
     },
     prevSong () {
       if (this.myAudioPlayer.currentTime < 2) {
+        Vue.set(this.playlist[this.currentSong], 'isPlaying', false)
         this.currentSong = Utils.mod(this.currentSong - 1, this.playlist.length)
+        Vue.set(this.playlist[this.currentSong], 'isPlaying', false)
       }
       this.myAudioPlayer.currentTime = 0
       this.playSong()
@@ -160,8 +189,6 @@ export default {
       this.updateVolumeBar()
     },
     updateVolumeBar () {
-      // this.volumeBar.style.width = (this.myAudioPlayer.volume * 100).toString() + '%'
-      // this.volume.volumeLeft.style.width = (this.myAudioPlayer.volume * 100 - 4).toString() + '%'
       this.cleanVolumeLeft(this.myAudioPlayer.volume * 100)
       this.volume.volumeBar.value = (this.myAudioPlayer.volume * 100)
     },
@@ -240,7 +267,7 @@ export default {
 <style lang="scss">
 @import url('../../node_modules/font-awesome/css/font-awesome.min.css');
 .av {
-  width: 100%;
+  width: 100vw;
   position: fixed;
   bottom: 0;
   color: white;
@@ -252,7 +279,7 @@ export default {
     bottom: 0;
     height: var(--av-height);
     background: #282828;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, .5);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, .15);
 
     &__meta {
       position: absolute;
@@ -379,14 +406,20 @@ export default {
         justify-content: center;
         align-items: center;
         cursor: pointer;
+        position: relative;
       }
     }
   }
 }
 
+.active-fa {
+  color: white;
+}
+
 input[type=range] {
   -webkit-appearance: none;
   background-color: gray;
+  cursor: pointer;
 }
 
 input[type=range]:focus {
@@ -405,6 +438,6 @@ input[type=range]::-webkit-slider-thumb {
   margin-top: -5px;
   border-radius: 50%;
   cursor: pointer;
-  background-color: green;
+  background-color: white;
 }
 </style>
