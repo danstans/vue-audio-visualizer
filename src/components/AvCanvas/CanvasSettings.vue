@@ -63,6 +63,10 @@ export default {
         case 83:
           this.showMenu = !this.showMenu
           break
+        case 27:
+          console.log('closing canvas')
+          this.$emit('showCanvas')
+          break
       }
     }
   }

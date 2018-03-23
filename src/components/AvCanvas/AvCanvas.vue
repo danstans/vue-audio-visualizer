@@ -6,6 +6,7 @@
     @nextSong="$emit('nextSong')"
     @lowerVolume="$emit('lowerVolume')"
     @raiseVolume="$emit('raiseVolume')"
+    @showCanvas="$emit('showCanvas')"
     ></canvas-settings>
     <canvas ref="canvas"></canvas>
   </div>
@@ -51,7 +52,7 @@ export default {
       var timeFrequencyData = new Uint8Array(fftSize)
       const numBars = 64
       const gapSize = 4
-      const step = Math.round(frqBits / (numBars))
+      const step = Math.round(frqBits * 0.85 / (numBars)) // Songs do not contain the higher frequencies so cut them out
       var xPos = 0
       var barWidth = this.myCanvas.width / (numBars)
       this.audioAnalyser.getByteFrequencyData(dataArray)
@@ -87,5 +88,6 @@ export default {
   .av__visualizer {
     height: calc(100% - var(--av-height));
     width: 100%;
+    position: relative;
   }
 </style>
