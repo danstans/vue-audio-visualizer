@@ -55,7 +55,7 @@
 
       <!-- HTML5 Audio -->
       <audio
-      :src="computedPlaylist[currentSong].songLive"
+      :src="computedPlaylist[currentSong].songSrc"
       type="audio/mp3"
       ref="myAudio"
       @timeupdate='onTimeUpdateListener'
@@ -266,6 +266,10 @@ export default {
 
 <style lang="scss">
 @import url('../../node_modules/font-awesome/css/font-awesome.min.css');
+body {
+  overflow-x:hidden;  
+}
+
 .av {
   width: 100vw;
   position: fixed;
