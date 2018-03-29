@@ -2,7 +2,6 @@
 node_modules
 /static
 dist/*
-README.md
 # local env files
 .env.local
 .env.*.local

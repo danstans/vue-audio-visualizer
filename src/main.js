@@ -1,20 +1,15 @@
-import Vue from 'vue'
-import App from './App.vue'
-Vue.config.productionTip = false
+// import Vue from 'vue'
+import AudioVisualizer from './components/AudioVisualizer.vue'
+// Vue.config.productionTip = false
 
-new Vue({
-  render: h => h(App)
-}).$mount('#app')
-
-// import AudioVisualizer from './components/AudioVisualizer'
-// const AVPlugin = {
-//   install (Vue) {
+// const VueAudioVisualizer = {
+//   install (Vue, params = {}) {
 //     Vue.component('audio-visualizer', AudioVisualizer)
 //   }
 // }
 
-// export default AVPlugin
+// export default VueAudioVisualizer
 
-// if (typeof window !== 'undefined' && window.Vue) {
-//   window.Vue.use(AVPlugin)
-// }
+export {
+  AudioVisualizer
+}

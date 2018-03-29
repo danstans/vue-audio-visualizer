@@ -1,11 +1,13 @@
 {
   "name": "vue-audio-visualizer",
-  "version": "0.1.0",
+  "version": "0.1.12",
   "private": false,
+  "main": "dist/audio-visualizer.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "build-dev": "vue-cli-service build --target wc --name audio-visualizer"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
