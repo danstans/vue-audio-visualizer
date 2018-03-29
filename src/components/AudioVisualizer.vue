@@ -266,6 +266,11 @@ export default {
 
 <style lang="scss">
 @import url('../../node_modules/font-awesome/css/font-awesome.min.css');
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
 body {
   overflow-x:hidden;  
 }
