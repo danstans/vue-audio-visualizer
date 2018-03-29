@@ -55,7 +55,7 @@
 
       <!-- HTML5 Audio -->
       <audio
-      :src="computedPlaylist[currentSong].songLive"
+      :src="computedPlaylist[currentSong].songSrc"
       type="audio/mp3"
       ref="myAudio"
       @timeupdate='onTimeUpdateListener'
@@ -273,6 +273,10 @@ export default {
 * {
   box-sizing: border-box;
   margin: 0;
+}
+
+body {
+  overflow-x:hidden;  
 }
 
 .av {
