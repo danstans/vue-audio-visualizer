@@ -6,6 +6,7 @@
     <audio-visualizer
      avHeight="82px"
      :playlist="playlist"
+     :canvas="true"
     ></audio-visualizer>
   </div>
 </template>
@@ -56,8 +57,5 @@ export default {
 </script>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-}
+
 </style>

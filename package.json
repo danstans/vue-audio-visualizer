@@ -1,10 +1,10 @@
 {
-  "name": "audio-visualizer",
+  "name": "vue-audio-visualizer",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build && mkdir ./dist/static && cp ./static/* ./dist/static",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

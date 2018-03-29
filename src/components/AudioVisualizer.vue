@@ -50,7 +50,7 @@
           <i class="fa fa-volume-up" @mouseover="togglers.showVolumeSlider=true" @mouseout="togglers.showVolumeSlider=false" aria-hidden="true"></i>
         </div>
         <i class="fa fa-list-ol" :class="{'active-fa': isShowing.playlist}" aria-hidden="true" @click="isShowing.playlist = !isShowing.playlist"></i>
-        <i @click="showCanvas" :class="{'active-fa': isShowing.showVis}" class="fa fa-signal" aria-hidden="true"></i>
+        <i @click="showCanvas" v-if="canvas" :class="{'active-fa': isShowing.showVis}" class="fa fa-signal" aria-hidden="true"></i>
       </div>
 
       <!-- HTML5 Audio -->
@@ -89,6 +89,10 @@ export default {
     avHeight: {
       type: String,
       default: '72px'
+    },
+    canvas: {
+      type: Boolean,
+      default: false
     },
     playlist: {
       type: Array,
@@ -266,6 +270,11 @@ export default {
 
 <style lang="scss">
 @import url('../../node_modules/font-awesome/css/font-awesome.min.css');
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
 .av {
   width: 100vw;
   position: fixed;
