@@ -5,7 +5,7 @@
   "main": "dist/audio-visualizer.js",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build -d docs",
     "lint": "vue-cli-service lint",
     "build-dev": "vue-cli-service build --target wc --name audio-visualizer"
   },

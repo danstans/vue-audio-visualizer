@@ -1,5 +1,11 @@
-// import Vue from 'vue'
-import AudioVisualizer from './components/AudioVisualizer.vue'
+import Vue from 'vue'
+import App from './App'
+// import AudioVisualizer from './components/AudioVisualizer.vue'
+
+new Vue({
+  render: h => h(App)
+}).$mount('#app')
+
 // Vue.config.productionTip = false
 
 // const VueAudioVisualizer = {
@@ -8,8 +14,8 @@ import AudioVisualizer from './components/AudioVisualizer.vue'
 //   }
 // }
 
-// export default VueAudioVisualizer
+// // export default VueAudioVisualizer
 
-export {
-  AudioVisualizer
-}
+// export {
+//   AudioVisualizer
+// }
