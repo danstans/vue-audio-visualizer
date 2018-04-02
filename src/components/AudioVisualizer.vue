@@ -272,7 +272,7 @@ export default {
 }
 
 body {
-  overflow-x:hidden;  
+  overflow-x:hidden;
 }
 
 .av {
