@@ -55,7 +55,7 @@
 
       <!-- HTML5 Audio -->
       <audio
-      :src="computedPlaylist[currentSong].songLive"
+      :src="computedPlaylist[currentSong].songSrc"
       type="audio/mp3"
       ref="myAudio"
       @timeupdate='onTimeUpdateListener'
