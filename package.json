@@ -5,9 +5,8 @@
   "main": "dist/audio-visualizer.js",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "rm -rf docs && vue-cli-service build && mv dist/ docs/",
-    "lint": "vue-cli-service lint",
-    "build-dev": "vue-cli-service build --target wc --name audio-visualizer"
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
