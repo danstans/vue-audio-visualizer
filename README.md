@@ -2,6 +2,8 @@
 
 A Better Media Player for Vue. Built in UI and Audio Visualizer.
 
+## This project is still under heavy development and the following installation instructions may not work. Open an issue with suggestions or send a pull request if you are able to get the instructions to work.
+
 <!-- # Demo -->
 
 [Demo](http://vue-visualizer.firebaseapp.com)
